@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { formatDateTime } from '@/lib/utils';
 
@@ -159,7 +160,16 @@ export default function QRCheckPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 flex items-center justify-center">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold text-center mb-8 text-blue-600">출퇴근 체크</h1>
+          <h1 className="text-3xl font-bold text-center mb-2 text-blue-600">출퇴근 체크</h1>
+          
+          {step === 'info' && (
+            <p className="text-center text-sm text-gray-600 mb-6">
+              아직 회원이 아니신가요?{' '}
+              <Link href="/worker/signup" className="text-blue-600 font-semibold hover:underline">
+                회원가입
+              </Link>
+            </p>
+          )}
 
           {message && (
             <div className={`p-4 rounded-lg mb-6 ${
