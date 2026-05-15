@@ -14,18 +14,11 @@ interface AttendanceRecord {
 }
 
 export default function QRCheckPage() {
-  const [step, setStep] = useState<'qr' | 'info' | 'confirm'>('qr');
+  const [step, setStep] = useState<'info' | 'confirm'>('info');
   const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null);
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const supabase = createClient();
-
-  // QR 코드 스캔 성공 시 - 입력 화면으로 이동
-  const handleQRScanned = () => {
-    setStep('info');
-    setFormData({ name: '', phone: '' });
-    setMessage(null);
-  };
 
   // 폼 데이터 입력
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +118,7 @@ export default function QRCheckPage() {
     });
     
     setTimeout(() => {
-      setStep('qr');
+      setStep('info');
       setCurrentRecord(null);
       setFormData({ name: '', phone: '' });
       setMessage(null);
@@ -155,7 +148,7 @@ export default function QRCheckPage() {
     });
     
     setTimeout(() => {
-      setStep('qr');
+      setStep('info');
       setCurrentRecord(null);
       setFormData({ name: '', phone: '' });
       setMessage(null);
@@ -175,26 +168,6 @@ export default function QRCheckPage() {
                 : 'bg-red-100 text-red-800 border border-red-300'
             }`}>
               {message.text}
-            </div>
-          )}
-
-          {/* QR 스캔 단계 */}
-          {step === 'qr' && (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg p-12 text-center">
-                <svg className="w-20 h-20 mx-auto mb-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                </svg>
-                <p className="text-gray-700 font-semibold mb-2">QR 코드를 스캔하세요</p>
-                <p className="text-gray-500 text-sm">카메라로 QR 표식을 찍으면 자동으로 입력 화면으로 이동합니다</p>
-              </div>
-              
-              <button
-                onClick={handleQRScanned}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-6"
-              >
-                테스트: QR 스캔 시뮬레이션
-              </button>
             </div>
           )}
 
@@ -236,13 +209,12 @@ export default function QRCheckPage() {
                 </button>
                 <button
                   onClick={() => {
-                    setStep('qr');
                     setFormData({ name: '', phone: '' });
                     setMessage(null);
                   }}
                   className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
                 >
-                  취소
+                  초기화
                 </button>
               </div>
             </div>
@@ -304,13 +276,13 @@ export default function QRCheckPage() {
                     </button>
                     <button
                       onClick={() => {
-                        setStep('qr');
+                        setStep('info');
                         setCurrentRecord(null);
                         setFormData({ name: '', phone: '' });
                       }}
                       className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
                     >
-                      취소
+                      다시 입력
                     </button>
                   </>
                 ) : currentRecord.check_in_time && !currentRecord.check_out_time ? (
@@ -323,13 +295,13 @@ export default function QRCheckPage() {
                     </button>
                     <button
                       onClick={() => {
-                        setStep('qr');
+                        setStep('info');
                         setCurrentRecord(null);
                         setFormData({ name: '', phone: '' });
                       }}
                       className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
                     >
-                      취소
+                      다시 입력
                     </button>
                   </>
                 ) : (
