@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { AuthGuard } from '@/components/AuthGuard';
 import {
   formatDate,
   calculateWorkingHours,
@@ -27,6 +28,14 @@ interface WorkerSalary {
 }
 
 export default function AdminSalaryPage() {
+  return (
+    <AuthGuard requiredRole="admin">
+      <SalaryContent />
+    </AuthGuard>
+  );
+}
+
+function SalaryContent() {
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [workersSalaries, setWorkersSalaries] = useState<WorkerSalary[]>([]);
   const [loading, setLoading] = useState(false);

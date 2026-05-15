@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate, formatTime, calculateWorkingHours } from '@/lib/utils';
+import { AuthGuard } from '@/components/AuthGuard';
 
 interface WorkerAttendance {
   worker_id: string;
@@ -16,6 +17,14 @@ interface WorkerAttendance {
 }
 
 export default function AdminDashboardPage() {
+  return (
+    <AuthGuard requiredRole="admin">
+      <AdminContent />
+    </AuthGuard>
+  );
+}
+
+function AdminContent() {
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [attendanceData, setAttendanceData] = useState<WorkerAttendance[]>([]);
   const [loading, setLoading] = useState(false);

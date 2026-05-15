@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { AuthGuard } from '@/components/AuthGuard';
 
 interface Worker {
   id: string;
@@ -13,6 +14,14 @@ interface Worker {
 }
 
 export default function AdminWorkersPage() {
+  return (
+    <AuthGuard requiredRole="admin">
+      <WorkersContent />
+    </AuthGuard>
+  );
+}
+
+function WorkersContent() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
