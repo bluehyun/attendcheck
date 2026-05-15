@@ -183,7 +183,7 @@ export default function QRCheckPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="이름을 입력하세요"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black"
                   />
                 </div>
                 
@@ -195,7 +195,7 @@ export default function QRCheckPage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="전화번호를 입력하세요 (예: 01012345678)"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black"
                   />
                 </div>
               </div>
