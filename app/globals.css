@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --primary: 220 90% 56%;
+  --secondary: 210 40% 96%;
+  --accent: 48 100% 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 220 15% 10%;
+    --foreground: 0 0% 95%;
+    --primary: 220 90% 56%;
+    --secondary: 220 30% 20%;
+    --accent: 48 100% 50%;
+  }
+}
+
+* {
+  @apply border-gray-200;
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
