@@ -3,13 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { formatDateTime } from '@/lib/utils';
 
 const HOURLY_RATE = 10320;
 const LUNCH_TIME_HOURS = 1; // 점심시간 1시간
 const OVERTIME_MULTIPLIER = 1.5;
-const WEEKLY_HOLIDAY_ALLOWANCE = 82560;
-const WEEKLY_MINIMUM_HOURS = 15;
 
 interface AttendanceRecord {
   worker_id: string;
@@ -33,7 +30,6 @@ export default function WorkerPage() {
   const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null);
   const [dailySalary, setDailySalary] = useState<DailySalary | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [actionType, setActionType] = useState<'checkin' | 'checkout' | null>(null);
   const supabase = createClient();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +143,6 @@ export default function WorkerPage() {
         setFormData({ name: '', phone: '' });
         setCurrentRecord(null);
         setMessage(null);
-        setActionType(null);
       }, 2000);
     } catch (error) {
       setMessage({ type: 'error', text: '출근 등록에 실패했습니다.' });
@@ -212,7 +207,6 @@ export default function WorkerPage() {
     setCurrentRecord(null);
     setDailySalary(null);
     setMessage(null);
-    setActionType(null);
   };
 
   return (

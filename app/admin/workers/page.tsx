@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+
+export const dynamic = 'force-dynamic';
 import { AuthGuard } from '@/components/AuthGuard';
 
 interface Worker {
