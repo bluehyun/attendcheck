@@ -29,6 +29,10 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+input {
+  @apply text-black;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
