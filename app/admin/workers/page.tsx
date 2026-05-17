@@ -177,12 +177,20 @@ function WorkersContent() {
                         {new Date(worker.created_at).toLocaleDateString('ko-KR')}
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleDeleteWorker(worker.id)}
-                          className="text-red-600 hover:text-red-800 font-semibold"
-                        >
-                          삭제
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/admin/workers/${worker.id}`}
+                            className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                          >
+                            이력 보기
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteWorker(worker.id)}
+                            className="text-red-600 hover:text-red-800 font-semibold text-sm"
+                          >
+                            삭제
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
