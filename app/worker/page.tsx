@@ -76,17 +76,19 @@ export default function WorkerPage() {
       }
 
       if (existing) {
-        await supabase
+        const { error } = await supabase
           .from('attendance')
           .update({ check_in_time: now })
           .eq('id', existing.id);
+        if (error) throw error;
       } else {
-        await supabase.from('attendance').insert({
+        const { error } = await supabase.from('attendance').insert({
           phone: formData.phone,
           name: formData.name,
           check_date: today,
           check_in_time: now,
         });
+        if (error) throw error;
       }
 
       setMessage({
@@ -94,8 +96,9 @@ export default function WorkerPage() {
         text: `${formData.name}님 ${new Date(now).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 출근 완료`,
       });
       setFormData({ name: '', phone: '' });
-    } catch {
-      setMessage({ type: 'error', text: '출근 등록에 실패했습니다.' });
+    } catch (error) {
+      console.error('출근 등록 오류:', error);
+      setMessage({ type: 'error', text: '출근 등록에 실패했습니다. 관리자에게 문의하세요.' });
     } finally {
       setLoading(null);
     }
@@ -127,15 +130,17 @@ export default function WorkerPage() {
         return;
       }
 
-      await supabase
+      const { error } = await supabase
         .from('attendance')
         .update({ check_out_time: now })
         .eq('id', existing.id);
+      if (error) throw error;
 
       setDailySalary(calculateDailySalary(existing.check_in_time, now));
       setFormData({ name: '', phone: '' });
-    } catch {
-      setMessage({ type: 'error', text: '퇴근 등록에 실패했습니다.' });
+    } catch (error) {
+      console.error('퇴근 등록 오류:', error);
+      setMessage({ type: 'error', text: '퇴근 등록에 실패했습니다. 관리자에게 문의하세요.' });
     } finally {
       setLoading(null);
     }
