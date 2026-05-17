@@ -3,13 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { formatDateTime } from '@/lib/utils';
-
-const HOURLY_RATE = 10320;
-const LUNCH_TIME_HOURS = 1; // 점심시간 1시간
-const OVERTIME_MULTIPLIER = 1.5;
-const WEEKLY_HOLIDAY_ALLOWANCE = 82560;
-const WEEKLY_MINIMUM_HOURS = 15;
+import { HOURLY_RATE, LUNCH_TIME_HOURS, OVERTIME_MULTIPLIER } from '@/lib/utils';
 
 interface AttendanceRecord {
   worker_id: string;
@@ -50,8 +44,16 @@ export default function WorkerPage() {
       return;
     }
 
-    // 오늘의 기록 조회
     const today = new Date().toISOString().split('T')[0];
+
+    // 근로자 ID 조회
+    const { data: workerData } = await supabase
+      .from('workers')
+      .select('id')
+      .eq('phone', formData.phone)
+      .single();
+
+    // 오늘의 기록 조회
     const { data: todayRecord } = await supabase
       .from('attendance')
       .select('*')
@@ -60,7 +62,7 @@ export default function WorkerPage() {
       .single();
 
     setCurrentRecord({
-      worker_id: '',
+      worker_id: workerData?.id || '',
       name: formData.name,
       phone: formData.phone,
       check_date: today,
@@ -125,6 +127,7 @@ export default function WorkerPage() {
       } else {
         // 새로운 기록 생성
         await supabase.from('attendance').insert({
+          ...(currentRecord?.worker_id ? { worker_id: currentRecord.worker_id } : {}),
           phone: formData.phone,
           name: formData.name,
           check_date: today,

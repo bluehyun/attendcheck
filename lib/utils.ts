@@ -3,6 +3,7 @@ export const HOURLY_RATE = 10320; // 기본 시급
 export const OVERTIME_MULTIPLIER = 1.5; // 연장근무 배수
 export const WEEKLY_HOLIDAY_ALLOWANCE = 82560; // 주휴수당
 export const WEEKLY_MINIMUM_HOURS = 15; // 주휴수당 최소 근무시간
+export const LUNCH_TIME_HOURS = 1; // 점심시간 제외 시간
 
 // 급여 계산 함수
 export function calculateDailyWage(hours: number): number {
@@ -25,7 +26,8 @@ export function calculateWeeklyWage(regularHours: number, overtimeHours: number)
 export function calculateWorkingHours(checkIn: Date, checkOut: Date): number {
   const diffMs = checkOut.getTime() - checkIn.getTime();
   const diffHours = diffMs / (1000 * 60 * 60);
-  return Math.round(diffHours * 10) / 10; // 소수점 첫째 자리까지
+  const workingHours = Math.max(0, diffHours - LUNCH_TIME_HOURS);
+  return Math.round(workingHours * 10) / 10;
 }
 
 // 날짜 포맷팅

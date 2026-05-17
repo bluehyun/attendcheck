@@ -1,7 +1,7 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  return request.nextResponse
+  return NextResponse.next()
 }
 
 export const config = {
