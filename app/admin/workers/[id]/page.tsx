@@ -7,14 +7,9 @@ import { createClient } from '@/lib/supabase/client';
 import { AuthGuard } from '@/components/AuthGuard';
 import { formatDate, formatTime, calculateWorkingHours } from '@/lib/utils';
 
-interface Worker {
-  id: string;
-  name: string;
-  phone: string;
-}
-
 interface AttendanceRecord {
   id: string;
+  name: string;
   check_date: string;
   check_in_time: string;
   check_out_time: string | null;
@@ -31,9 +26,9 @@ export default function WorkerHistoryPage() {
 
 function WorkerHistoryContent() {
   const params = useParams();
-  const workerId = params.id as string;
+  const phone = decodeURIComponent(params.id as string);
 
-  const [worker, setWorker] = useState<Worker | null>(null);
+  const [workerName, setWorkerName] = useState<string>('');
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState<string>(() => {
@@ -44,23 +39,23 @@ function WorkerHistoryContent() {
   const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split('T')[0]);
   const supabase = createClient();
 
-  const fetchWorker = useCallback(async () => {
-    const { data } = await supabase.from('workers').select('*').eq('id', workerId).single();
-    setWorker(data);
-  }, [supabase, workerId]);
-
   const fetchRecords = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from('attendance')
       .select('*')
-      .eq('worker_id', workerId)
+      .eq('phone', phone)
       .gte('check_date', dateFrom)
       .lte('check_date', dateTo)
       .order('check_date', { ascending: false });
 
+    if (data && data.length > 0) {
+      setWorkerName(data[0].name);
+    }
+
     const enriched = (data || []).map((r) => ({
       id: r.id,
+      name: r.name,
       check_date: r.check_date,
       check_in_time: r.check_in_time,
       check_out_time: r.check_out_time,
@@ -72,11 +67,7 @@ function WorkerHistoryContent() {
 
     setRecords(enriched);
     setLoading(false);
-  }, [supabase, workerId, dateFrom, dateTo]);
-
-  useEffect(() => {
-    fetchWorker();
-  }, [fetchWorker]);
+  }, [supabase, phone, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchRecords();
@@ -88,13 +79,12 @@ function WorkerHistoryContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="max-w-4xl mx-auto">
-        {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-primary">
-              {worker ? `${worker.name}님 근무 이력` : '근무 이력'}
+              {workerName ? `${workerName}님 근무 이력` : '근무 이력'}
             </h1>
-            {worker && <p className="text-gray-500 mt-1">{worker.phone}</p>}
+            <p className="text-gray-500 mt-1">{phone}</p>
           </div>
           <Link href="/admin/workers" className="text-primary hover:underline">
             ← 근로자 목록
@@ -175,13 +165,9 @@ function WorkerHistoryContent() {
                       </td>
                       <td className="px-4 py-3">
                         {record.check_out_time ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            완료
-                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">완료</span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            진행 중
-                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">진행 중</span>
                         )}
                       </td>
                     </tr>

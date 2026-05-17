@@ -44,33 +44,35 @@ export default function WorkerWagePage() {
     e.preventDefault();
     setLoading(true);
 
-    // 근로자 검색
-    const { data: worker, error } = await supabase
-      .from('workers')
-      .select('*')
+    // 전화번호로 출퇴근 기록에서 이름 확인
+    const { data: latest } = await supabase
+      .from('attendance')
+      .select('name')
       .eq('phone', phone)
+      .order('check_date', { ascending: false })
+      .limit(1)
       .single();
 
-    if (error || !worker) {
-      alert('등록되지 않은 전화번호입니다');
+    if (!latest) {
+      alert('해당 전화번호의 근무 기록이 없습니다');
       setLoading(false);
       return;
     }
 
-    setWorkerName(worker.name);
-    await fetchWeeklyWage(worker.id, selectedWeek);
+    setWorkerName(latest.name);
+    await fetchWeeklyWage(phone, selectedWeek);
     setSearched(true);
     setLoading(false);
   };
 
-  const fetchWeeklyWage = async (workerId: string, weekDate: Date) => {
+  const fetchWeeklyWage = async (workerPhone: string, weekDate: Date) => {
     const weekStart = getWeekStart(weekDate);
     const weekEnd = getWeekEnd(weekDate);
 
     const { data: records } = await supabase
       .from('attendance')
       .select('*')
-      .eq('worker_id', workerId)
+      .eq('phone', workerPhone)
       .gte('check_date', weekStart.toISOString().split('T')[0])
       .lte('check_date', weekEnd.toISOString().split('T')[0])
       .order('check_date', { ascending: true });
@@ -145,17 +147,7 @@ export default function WorkerWagePage() {
     setSelectedWeek(newDate);
 
     if (workerName) {
-      // 전화번호로 다시 근로자 ID를 조회하고 급여를 계산
-      supabase
-        .from('workers')
-        .select('id')
-        .eq('phone', phone)
-        .single()
-        .then(({ data: worker }) => {
-          if (worker) {
-            fetchWeeklyWage(worker.id, newDate);
-          }
-        });
+      fetchWeeklyWage(phone, newDate);
     }
   };
 

@@ -50,45 +50,47 @@ function SalaryContent() {
 
     const weekStart = getWeekStart(weekDate);
     const weekEnd = getWeekEnd(weekDate);
+    const startStr = weekStart.toISOString().split('T')[0];
+    const endStr = weekEnd.toISOString().split('T')[0];
 
-    // 모든 근로자 조회
-    const { data: workers } = await supabase.from('workers').select('*');
+    // 해당 주간의 attendance 전체 조회
+    const { data: records } = await supabase
+      .from('attendance')
+      .select('*')
+      .gte('check_date', startStr)
+      .lte('check_date', endStr);
 
-    if (!workers) {
+    if (!records) {
       setWorkersSalaries([]);
       setLoading(false);
       return;
     }
 
+    // 전화번호 기준으로 근로자별 집계
+    const phoneMap = new Map<string, { name: string; records: typeof records }>();
+    for (const r of records) {
+      if (!phoneMap.has(r.phone)) {
+        phoneMap.set(r.phone, { name: r.name, records: [] });
+      }
+      phoneMap.get(r.phone)!.records.push(r);
+    }
+
     const salaries: WorkerSalary[] = [];
 
-    for (const worker of workers) {
-      const { data: records } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('worker_id', worker.id)
-        .gte('check_date', weekStart.toISOString().split('T')[0])
-        .lte('check_date', weekEnd.toISOString().split('T')[0]);
-
+    for (const [phone, { name, records: workerRecords }] of phoneMap) {
       let totalRegularHours = 0;
       let totalOvertimeHours = 0;
 
-      if (records && records.length > 0) {
-        records.forEach((record) => {
-          if (record.check_in_time && record.check_out_time) {
-            const hoursWorked = calculateWorkingHours(
-              new Date(record.check_in_time),
-              new Date(record.check_out_time)
-            );
-
-            const regularHours = Math.min(hoursWorked, 8);
-            const overtimeHours = Math.max(0, hoursWorked - 8);
-
-            totalRegularHours += regularHours;
-            totalOvertimeHours += overtimeHours;
-          }
-        });
-      }
+      workerRecords.forEach((record) => {
+        if (record.check_in_time && record.check_out_time) {
+          const hoursWorked = calculateWorkingHours(
+            new Date(record.check_in_time),
+            new Date(record.check_out_time)
+          );
+          totalRegularHours += Math.min(hoursWorked, 8);
+          totalOvertimeHours += Math.max(0, hoursWorked - 8);
+        }
+      });
 
       const regularWage = Math.round(HOURLY_RATE * totalRegularHours);
       const overtimeWage = Math.round(HOURLY_RATE * OVERTIME_MULTIPLIER * totalOvertimeHours);
@@ -98,9 +100,9 @@ function SalaryContent() {
           : 0;
 
       salaries.push({
-        worker_id: worker.id,
-        worker_name: worker.name,
-        phone: worker.phone,
+        worker_id: phone,
+        worker_name: name,
+        phone,
         regularHours: Math.round(totalRegularHours * 10) / 10,
         overtimeHours: Math.round(totalOvertimeHours * 10) / 10,
         regularWage,

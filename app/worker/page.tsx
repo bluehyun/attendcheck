@@ -63,12 +63,6 @@ export default function WorkerPage() {
     const now = new Date().toISOString();
 
     try {
-      const { data: workerData } = await supabase
-        .from('workers')
-        .select('id')
-        .eq('phone', formData.phone)
-        .single();
-
       const { data: existing } = await supabase
         .from('attendance')
         .select('*')
@@ -88,7 +82,6 @@ export default function WorkerPage() {
           .eq('id', existing.id);
       } else {
         await supabase.from('attendance').insert({
-          ...(workerData?.id ? { worker_id: workerData.id } : {}),
           phone: formData.phone,
           name: formData.name,
           check_date: today,

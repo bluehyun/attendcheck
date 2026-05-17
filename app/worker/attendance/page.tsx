@@ -25,26 +25,11 @@ export default function WorkerAttendancePage() {
     e.preventDefault();
     setLoading(true);
 
-    // 전화번호로 근로자 검색
-    const { data: worker, error } = await supabase
-      .from('workers')
-      .select('*')
-      .eq('phone', phone)
-      .single();
-
-    if (error || !worker) {
-      alert('등록되지 않은 전화번호입니다');
-      setLoading(false);
-      return;
-    }
-
-    setWorkerName(worker.name);
-
-    // 출퇴근 기록 조회
+    // 전화번호로 출퇴근 기록 직접 조회
     const { data: records, error: recordError } = await supabase
       .from('attendance')
       .select('*')
-      .eq('worker_id', worker.id)
+      .eq('phone', phone)
       .order('check_date', { ascending: false });
 
     if (recordError) {
@@ -52,6 +37,14 @@ export default function WorkerAttendancePage() {
       setLoading(false);
       return;
     }
+
+    if (!records || records.length === 0) {
+      alert('해당 전화번호의 근무 기록이 없습니다');
+      setLoading(false);
+      return;
+    }
+
+    setWorkerName(records[0].name);
 
     const enrichedRecords = (records || []).map((record) => ({
       ...record,
