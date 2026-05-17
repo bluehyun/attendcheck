@@ -77,7 +77,7 @@ function AdminContent() {
   };
 
   // 통계 계산
-  const totalWorkers = new Set(attendanceData.map((a) => a.worker_id)).size;
+  const totalWorkers = new Set(attendanceData.map((a) => a.phone)).size;
   const checkedIn = attendanceData.filter((a) => a.check_in_time).length;
   const checkedOut = attendanceData.filter((a) => a.check_out_time).length;
   const totalWorkingHours = attendanceData.reduce((sum, a) => sum + (a.working_hours || 0), 0);
@@ -153,24 +153,24 @@ function AdminContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-secondary">
+                <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       이름
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       전화번호
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       출근 시간
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       퇴근 시간
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       근무 시간
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-black">
                       상태
                     </th>
                   </tr>
