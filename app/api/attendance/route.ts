@@ -14,8 +14,11 @@ export async function POST(request: NextRequest) {
   const { action, phone, name, check_date, check_in_time, check_out_time } = body
 
   const supabase = getAdminClient()
-  const today = check_date ?? new Date().toISOString().split('T')[0]
-  const now = new Date().toISOString()
+
+  // 한국 시간(KST, UTC+9) 기준
+  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const today = check_date ?? kstNow.toISOString().split('T')[0]
+  const now = check_in_time ?? check_out_time ?? kstNow.toISOString().replace('Z', '')
 
   if (action === 'checkin') {
     const { data: existing } = await supabase
@@ -32,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (existing) {
       const { error } = await supabase
         .from('attendance')
-        .update({ check_in_time: check_in_time ?? now })
+        .update({ check_in_time: now })
         .eq('id', existing.id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     } else {
@@ -40,12 +43,12 @@ export async function POST(request: NextRequest) {
         phone,
         name,
         check_date: today,
-        check_in_time: check_in_time ?? now,
+        check_in_time: now,
       })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, time: check_in_time ?? now })
+    return NextResponse.json({ success: true, time: now })
   }
 
   if (action === 'checkout') {
@@ -65,11 +68,11 @@ export async function POST(request: NextRequest) {
 
     const { error } = await supabase
       .from('attendance')
-      .update({ check_out_time: check_out_time ?? now })
+      .update({ check_out_time: now })
       .eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    return NextResponse.json({ success: true, time: check_out_time ?? now, check_in_time: existing.check_in_time })
+    return NextResponse.json({ success: true, time: now, check_in_time: existing.check_in_time })
   }
 
   return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 })
