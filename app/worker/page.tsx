@@ -213,7 +213,6 @@ export default function WorkerPage() {
     setCurrentRecord(null);
     setDailySalary(null);
     setMessage(null);
-    setActionType(null);
   };
 
   return (
