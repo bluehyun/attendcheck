@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { HOURLY_RATE, LUNCH_TIME_HOURS, OVERTIME_MULTIPLIER } from '@/lib/utils';
 
 interface DailySalary {
@@ -19,7 +18,6 @@ export default function WorkerPage() {
   const [dailySalary, setDailySalary] = useState<DailySalary | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [loading, setLoading] = useState<'checkin' | 'checkout' | null>(null);
-  const supabase = createClient();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,45 +57,25 @@ export default function WorkerPage() {
     setMessage(null);
     setLoading('checkin');
 
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date().toISOString();
-
     try {
-      const { data: existing } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('phone', formData.phone)
-        .eq('check_date', today)
-        .single();
+      const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'checkin', phone: formData.phone, name: formData.name }),
+      });
+      const data = await res.json();
 
-      if (existing?.check_in_time) {
-        setMessage({ type: 'error', text: '이미 출근 기록이 있습니다.' });
+      if (!res.ok) {
+        setMessage({ type: 'error', text: data.error ?? '출근 등록에 실패했습니다.' });
         return;
-      }
-
-      if (existing) {
-        const { error } = await supabase
-          .from('attendance')
-          .update({ check_in_time: now })
-          .eq('id', existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('attendance').insert({
-          phone: formData.phone,
-          name: formData.name,
-          check_date: today,
-          check_in_time: now,
-        });
-        if (error) throw error;
       }
 
       setMessage({
         type: 'success',
-        text: `${formData.name}님 ${new Date(now).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 출근 완료`,
+        text: `${formData.name}님 ${new Date(data.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 출근 완료`,
       });
       setFormData({ name: '', phone: '' });
-    } catch (error) {
-      console.error('출근 등록 오류:', error);
+    } catch {
       setMessage({ type: 'error', text: '출근 등록에 실패했습니다. 관리자에게 문의하세요.' });
     } finally {
       setLoading(null);
@@ -109,37 +87,22 @@ export default function WorkerPage() {
     setMessage(null);
     setLoading('checkout');
 
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date().toISOString();
-
     try {
-      const { data: existing } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('phone', formData.phone)
-        .eq('check_date', today)
-        .single();
+      const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'checkout', phone: formData.phone, name: formData.name }),
+      });
+      const data = await res.json();
 
-      if (!existing?.check_in_time) {
-        setMessage({ type: 'error', text: '출근 기록이 없습니다.' });
+      if (!res.ok) {
+        setMessage({ type: 'error', text: data.error ?? '퇴근 등록에 실패했습니다.' });
         return;
       }
 
-      if (existing.check_out_time) {
-        setMessage({ type: 'error', text: '이미 퇴근 기록이 있습니다.' });
-        return;
-      }
-
-      const { error } = await supabase
-        .from('attendance')
-        .update({ check_out_time: now })
-        .eq('id', existing.id);
-      if (error) throw error;
-
-      setDailySalary(calculateDailySalary(existing.check_in_time, now));
+      setDailySalary(calculateDailySalary(data.check_in_time, data.time));
       setFormData({ name: '', phone: '' });
-    } catch (error) {
-      console.error('퇴근 등록 오류:', error);
+    } catch {
       setMessage({ type: 'error', text: '퇴근 등록에 실패했습니다. 관리자에게 문의하세요.' });
     } finally {
       setLoading(null);
