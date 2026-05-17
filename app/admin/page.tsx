@@ -64,8 +64,8 @@ function AdminContent() {
 
     const enriched = (records || []).map((record: any) => ({
       worker_id: record.worker_id,
-      worker_name: record.workers?.name || 'Unknown',
-      phone: record.workers?.phone || '-',
+      worker_name: record.workers?.name || record.name || 'Unknown',
+      phone: record.workers?.phone || record.phone || '-',
       check_date: record.check_date,
       check_in_time: record.check_in_time,
       check_out_time: record.check_out_time,
