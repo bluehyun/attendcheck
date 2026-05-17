@@ -46,12 +46,7 @@ function AdminContent() {
 
     const { data: records, error } = await supabase
       .from('attendance')
-      .select(
-        `
-        *,
-        workers:worker_id(id, name, phone)
-      `
-      )
+      .select('*')
       .eq('check_date', date)
       .order('check_in_time', { ascending: true });
 
@@ -64,8 +59,8 @@ function AdminContent() {
 
     const enriched = (records || []).map((record: any) => ({
       worker_id: record.worker_id,
-      worker_name: record.workers?.name || record.name || 'Unknown',
-      phone: record.workers?.phone || record.phone || '-',
+      worker_name: record.name || 'Unknown',
+      phone: record.phone || '-',
       check_date: record.check_date,
       check_in_time: record.check_in_time,
       check_out_time: record.check_out_time,
