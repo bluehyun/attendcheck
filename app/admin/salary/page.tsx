@@ -147,7 +147,7 @@ function SalaryContent() {
             </button>
             <div className="text-center">
               <p className="text-sm text-gray-600">선택된 주간</p>
-              <p className="text-xl font-bold">
+              <p className="text-xl font-bold text-black">
                 {formatDate(weekStart)} ~ {formatDate(weekEnd)}
               </p>
             </div>
@@ -200,28 +200,28 @@ function SalaryContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-secondary">
+                <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">이름</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left font-semibold text-black">이름</th>
+                    <th className="px-4 py-3 text-left font-semibold text-black">
                       전화번호
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       정상 시간
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       연장 시간
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       기본급
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       연장수당
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       주휴수당
                     </th>
-                    <th className="px-4 py-3 text-right font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-right font-semibold text-black">
                       합계
                     </th>
                   </tr>
