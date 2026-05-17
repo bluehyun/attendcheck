@@ -71,7 +71,7 @@ function WorkersContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-secondary">
+                <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">이름</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">전화번호</th>

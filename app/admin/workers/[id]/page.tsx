@@ -139,7 +139,7 @@ function WorkerHistoryContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-secondary">
+                <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">날짜</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">출근</th>

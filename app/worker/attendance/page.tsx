@@ -112,7 +112,7 @@ export default function WorkerAttendancePage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-secondary">
+                  <thead className="bg-gray-100">
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                         날짜

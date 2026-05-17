@@ -107,7 +107,7 @@ function AdminContent() {
             />
             <button
               onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-              className="px-4 py-2 bg-secondary text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors"
             >
               오늘
             </button>
@@ -234,7 +234,7 @@ function AdminContent() {
             </Link>
             <Link
               href="/admin/workers"
-              className="px-6 py-3 bg-secondary text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
             >
               근로자 관리
             </Link>

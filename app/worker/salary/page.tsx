@@ -199,7 +199,7 @@ export default function WorkerWagePage() {
                 </div>
 
                 {/* 주간 선택 */}
-                <div className="flex items-center justify-between mb-6 p-4 bg-secondary rounded-lg">
+                <div className="flex items-center justify-between mb-6 p-4 bg-gray-100 rounded-lg">
                   <button
                     onClick={() => handleWeekChange('prev')}
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700 transition-colors"
@@ -289,7 +289,7 @@ export default function WorkerWagePage() {
                     <h3 className="text-lg font-bold text-gray-800 mb-4">일별 근무 현황</h3>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-secondary">
+                        <thead className="bg-gray-100">
                           <tr>
                             <th className="px-4 py-3 text-left font-semibold text-gray-700">
                               날짜

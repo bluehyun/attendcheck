@@ -282,7 +282,7 @@ function SalaryContent() {
           </button>
           <Link
             href="/admin"
-            className="px-6 py-3 bg-secondary text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
           >
             돌아가기
           </Link>
