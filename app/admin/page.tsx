@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate, formatTime, calculateWorkingHours } from '@/lib/utils';
 import { AuthGuard } from '@/components/AuthGuard';
@@ -29,6 +30,12 @@ function AdminContent() {
   const [attendanceData, setAttendanceData] = useState<WorkerAttendance[]>([]);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
 
   useEffect(() => {
     fetchDailyAttendance(selectedDate);
@@ -85,9 +92,12 @@ function AdminContent() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-primary">관리자 대시보드</h1>
-          <Link href="/" className="text-primary hover:underline">
-            돌아가기 →
-          </Link>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm"
+          >
+            로그아웃
+          </button>
         </div>
 
         {/* 상단 네비게이션 */}
