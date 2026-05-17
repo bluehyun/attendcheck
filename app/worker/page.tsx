@@ -121,36 +121,36 @@ export default function WorkerPage() {
           <h1 className="text-3xl font-bold text-center text-blue-600">퇴근 완료</h1>
 
           <div className="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
-            <h3 className="font-bold text-gray-800 text-lg">근무 현황</h3>
+            <h3 className="font-bold text-black text-lg">근무 현황</h3>
             <div className="flex justify-between">
-              <span className="text-gray-700">출근</span>
-              <span className="font-semibold">{new Date(dailySalary.checkInTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="text-black">출근</span>
+              <span className="font-semibold text-black">{new Date(dailySalary.checkInTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-700">퇴근</span>
-              <span className="font-semibold">{new Date(dailySalary.checkOutTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="text-black">퇴근</span>
+              <span className="font-semibold text-black">{new Date(dailySalary.checkOutTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             <div className="border-t border-gray-300 pt-3 flex justify-between">
-              <span className="font-semibold text-gray-700">근무시간</span>
-              <span className="font-bold text-lg">{dailySalary.workingHours}시간</span>
+              <span className="font-semibold text-black">근무시간</span>
+              <span className="font-bold text-black text-lg">{dailySalary.workingHours}시간</span>
             </div>
           </div>
 
           <div className="bg-green-50 rounded-lg p-4 space-y-3 border border-green-200">
-            <h3 className="font-bold text-gray-800 text-lg">금일 급여</h3>
+            <h3 className="font-bold text-black text-lg">금일 급여</h3>
             <div className="flex justify-between">
-              <span className="text-gray-700">기본급 (시급 {HOURLY_RATE.toLocaleString()}원)</span>
-              <span className="font-semibold">{dailySalary.baseSalary.toLocaleString()}원</span>
+              <span className="text-black">기본급 (시급 {HOURLY_RATE.toLocaleString()}원)</span>
+              <span className="font-semibold text-black">{dailySalary.baseSalary.toLocaleString()}원</span>
             </div>
             {dailySalary.overtimeSalary > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-700">연장수당 (1.5배)</span>
-                <span className="font-semibold">{dailySalary.overtimeSalary.toLocaleString()}원</span>
+                <span className="text-black">연장수당 (1.5배)</span>
+                <span className="font-semibold text-black">{dailySalary.overtimeSalary.toLocaleString()}원</span>
               </div>
             )}
             <div className="border-t border-green-300 pt-3 flex justify-between bg-green-100 p-3 rounded">
-              <span className="font-bold text-gray-900 text-lg">총 급여</span>
-              <span className="font-bold text-green-700 text-xl">{dailySalary.totalSalary.toLocaleString()}원</span>
+              <span className="font-bold text-black text-lg">총 급여</span>
+              <span className="font-bold text-black text-xl">{dailySalary.totalSalary.toLocaleString()}원</span>
             </div>
           </div>
 
