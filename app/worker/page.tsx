@@ -229,7 +229,7 @@ export default function WorkerPage() {
 
           <div className="pt-2 border-t border-gray-200 mt-2">
             <Link
-              href="/worker/mywage"
+              href={`/worker/mywage?phone=${encodeURIComponent(formData.phone)}&name=${encodeURIComponent(formData.name)}`}
               className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-sm"
             >
               📋 내 급여 조회

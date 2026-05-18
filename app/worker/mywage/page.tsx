@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
   HOURLY_RATE,
@@ -29,22 +30,26 @@ function calcDailyWage(checkIn: string, checkOut: string) {
 }
 
 export default function MyWagePage() {
-  const [phone, setPhone] = useState('');
-  const [workerName, setWorkerName] = useState('');
+  const searchParams = useSearchParams();
+  const initPhone = searchParams.get('phone') ?? '';
+  const initName = searchParams.get('name') ?? '';
+
+  const [phone, setPhone] = useState(initPhone);
+  const [workerName, setWorkerName] = useState(initName);
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const supabase = createClient();
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchData = useCallback(async (targetPhone: string) => {
+    if (!targetPhone) return;
     setLoading(true);
     setSearched(false);
 
     const { data } = await supabase
       .from('attendance')
       .select('*')
-      .eq('phone', phone)
+      .eq('phone', targetPhone)
       .order('check_date', { ascending: false });
 
     if (!data || data.length === 0) {
@@ -53,7 +58,7 @@ export default function MyWagePage() {
       return;
     }
 
-    setWorkerName(data[0].name);
+    if (!initName) setWorkerName(data[0].name);
 
     const daily: DailyRecord[] = data
       .filter((r) => r.check_in_time && r.check_out_time)
@@ -68,6 +73,18 @@ export default function MyWagePage() {
     setRecords(daily);
     setSearched(true);
     setLoading(false);
+  }, [supabase, initName]);
+
+  // 쿼리 파라미터로 phone이 넘어온 경우 자동 조회
+  useEffect(() => {
+    if (initPhone) {
+      fetchData(initPhone);
+    }
+  }, [initPhone, fetchData]);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchData(phone);
   };
 
   const totalWage = records.reduce((sum, r) => sum + r.dailyWage, 0);
@@ -81,29 +98,39 @@ export default function MyWagePage() {
           ← 출퇴근 화면으로
         </Link>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h1 className="text-2xl font-bold mb-6 text-blue-600">내 급여 조회</h1>
+        {/* 전화번호 직접 입력할 때만 폼 표시 (쿼리 파라미터 없는 경우) */}
+        {!initPhone && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 className="text-2xl font-bold mb-6 text-blue-600">내 급여 조회</h1>
+            <form onSubmit={handleSearch} className="flex gap-3">
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="전화번호를 입력하세요 (예: 01012345678)"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black"
+                required
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+              >
+                {loading ? '조회 중...' : '조회'}
+              </button>
+            </form>
+          </div>
+        )}
 
-          <form onSubmit={handleSearch} className="flex gap-3">
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="전화번호를 입력하세요 (예: 01012345678)"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black"
-              required
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-            >
-              {loading ? '조회 중...' : '조회'}
-            </button>
-          </form>
-        </div>
+        {/* 로딩 */}
+        {loading && (
+          <div className="bg-white rounded-lg shadow-lg p-12 text-center text-gray-500">
+            조회 중...
+          </div>
+        )}
 
-        {searched && (
+        {/* 결과 */}
+        {searched && !loading && (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-black mb-1">
               {workerName}님의 급여 내역
@@ -151,7 +178,7 @@ export default function MyWagePage() {
                   </table>
                 </div>
 
-                {/* 요약 */}
+                {/* 합계 */}
                 <div className="border-t-2 border-gray-300 pt-4 space-y-3">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>총 근무일</span>
