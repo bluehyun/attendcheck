@@ -226,6 +226,15 @@ export default function WorkerPage() {
               {loading === 'checkout' ? '처리 중...' : '퇴근'}
             </button>
           </div>
+
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <Link
+              href="/worker/mywage"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-sm"
+            >
+              📋 내 급여 조회
+            </Link>
+          </div>
         </div>
       </div>
     </div>
