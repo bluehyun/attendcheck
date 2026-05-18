@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -30,6 +30,14 @@ function calcDailyWage(checkIn: string, checkOut: string) {
 }
 
 export default function MyWagePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">로딩 중...</div>}>
+      <MyWageContent />
+    </Suspense>
+  );
+}
+
+function MyWageContent() {
   const searchParams = useSearchParams();
   const initPhone = searchParams.get('phone') ?? '';
   const initName = searchParams.get('name') ?? '';
