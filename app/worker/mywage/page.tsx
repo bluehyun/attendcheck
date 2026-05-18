@@ -18,7 +18,8 @@ interface DailyRecord {
 
 // calculateWorkingHours 내부에서 이미 점심시간(1h) 차감 처리됨
 function calcDailyWage(checkIn: string, checkOut: string) {
-  const workingHours = calculateWorkingHours(new Date(checkIn), new Date(checkOut));
+  // 근무시간 시간 단위 절사 (9시간 20분 → 9시간)
+  const workingHours = Math.floor(calculateWorkingHours(new Date(checkIn), new Date(checkOut)));
   const baseHours = Math.min(workingHours, 8);
   const overtimeHours = Math.floor(Math.max(0, workingHours - 8));
   const dailyWage =
@@ -190,7 +191,7 @@ export default function MyWagePage() {
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>총 근무시간</span>
-                    <span className="font-semibold text-black">{totalHours.toFixed(1)}시간</span>
+                    <span className="font-semibold text-black">{totalHours}시간</span>
                   </div>
                   <div className="flex justify-between items-center bg-green-50 rounded-lg p-4 border border-green-200">
                     <span className="text-lg font-bold text-black">총 급여 합계</span>
