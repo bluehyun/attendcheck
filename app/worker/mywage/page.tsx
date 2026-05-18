@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
   HOURLY_RATE,
@@ -30,23 +29,12 @@ function calcDailyWage(checkIn: string, checkOut: string) {
 }
 
 export default function MyWagePage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">로딩 중...</div>}>
-      <MyWageContent />
-    </Suspense>
-  );
-}
-
-function MyWageContent() {
-  const searchParams = useSearchParams();
-  const initPhone = searchParams.get('phone') ?? '';
-  const initName = searchParams.get('name') ?? '';
-
-  const [phone, setPhone] = useState(initPhone);
-  const [workerName, setWorkerName] = useState(initName);
+  const [phone, setPhone] = useState('');
+  const [workerName, setWorkerName] = useState('');
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
   const supabase = createClient();
 
   const fetchData = useCallback(async (targetPhone: string) => {
@@ -66,7 +54,7 @@ function MyWageContent() {
       return;
     }
 
-    if (!initName) setWorkerName(data[0].name);
+    setWorkerName((prev) => prev || data[0].name);
 
     const daily: DailyRecord[] = data
       .filter((r) => r.check_in_time && r.check_out_time)
@@ -81,14 +69,22 @@ function MyWageContent() {
     setRecords(daily);
     setSearched(true);
     setLoading(false);
-  }, [supabase, initName]);
+  }, [supabase]);
 
-  // 쿼리 파라미터로 phone이 넘어온 경우 자동 조회
+  // sessionStorage에서 phone/name 읽어서 자동 조회
   useEffect(() => {
-    if (initPhone) {
-      fetchData(initPhone);
+    const savedPhone = sessionStorage.getItem('mywage_phone') ?? '';
+    const savedName = sessionStorage.getItem('mywage_name') ?? '';
+    sessionStorage.removeItem('mywage_phone');
+    sessionStorage.removeItem('mywage_name');
+
+    if (savedPhone) {
+      setPhone(savedPhone);
+      setWorkerName(savedName);
+      setHasSession(true);
+      fetchData(savedPhone);
     }
-  }, [initPhone, fetchData]);
+  }, [fetchData]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,8 +102,8 @@ function MyWageContent() {
           ← 출퇴근 화면으로
         </Link>
 
-        {/* 전화번호 직접 입력할 때만 폼 표시 (쿼리 파라미터 없는 경우) */}
-        {!initPhone && (
+        {/* sessionStorage로 넘어온 경우가 아니면 직접 입력 폼 표시 */}
+        {!hasSession && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h1 className="text-2xl font-bold mb-6 text-blue-600">내 급여 조회</h1>
             <form onSubmit={handleSearch} className="flex gap-3">

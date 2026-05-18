@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { HOURLY_RATE, LUNCH_TIME_HOURS, OVERTIME_MULTIPLIER } from '@/lib/utils';
 
 interface DailySalary {
@@ -14,6 +15,7 @@ interface DailySalary {
 }
 
 export default function WorkerPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({ name: '', phone: '' });
   const [dailySalary, setDailySalary] = useState<DailySalary | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -228,12 +230,17 @@ export default function WorkerPage() {
           </div>
 
           <div className="pt-2 border-t border-gray-200 mt-2">
-            <Link
-              href={`/worker/mywage?phone=${encodeURIComponent(formData.phone)}&name=${encodeURIComponent(formData.name)}`}
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.setItem('mywage_phone', formData.phone);
+                sessionStorage.setItem('mywage_name', formData.name);
+                router.push('/worker/mywage');
+              }}
               className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-sm"
             >
               📋 내 급여 조회
-            </Link>
+            </button>
           </div>
         </div>
       </div>
