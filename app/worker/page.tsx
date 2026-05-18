@@ -38,7 +38,7 @@ export default function WorkerPage() {
     const totalHours = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
     const workingHours = Math.max(0, totalHours - LUNCH_TIME_HOURS);
     const baseHours = Math.min(workingHours, 8);
-    const overtimeHours = Math.max(0, workingHours - 8);
+    const overtimeHours = Math.floor(Math.max(0, workingHours - 8));
     const baseSalary = Math.floor(baseHours * HOURLY_RATE);
     const overtimeSalary = Math.floor(overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
 

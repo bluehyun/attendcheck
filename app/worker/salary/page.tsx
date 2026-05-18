@@ -104,7 +104,7 @@ export default function WorkerWagePage() {
 
         // 8시간 초과분은 연장근무로 계산
         const regularHours = Math.min(hoursWorked, 8);
-        const overtimeHours = Math.max(0, hoursWorked - 8);
+        const overtimeHours = Math.floor(Math.max(0, hoursWorked - 8));
 
         totalRegularHours += regularHours;
         totalOvertimeHours += overtimeHours;

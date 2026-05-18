@@ -88,7 +88,7 @@ function SalaryContent() {
             new Date(record.check_out_time)
           );
           totalRegularHours += Math.min(hoursWorked, 8);
-          totalOvertimeHours += Math.max(0, hoursWorked - 8);
+          totalOvertimeHours += Math.floor(Math.max(0, hoursWorked - 8));
         }
       });
 
