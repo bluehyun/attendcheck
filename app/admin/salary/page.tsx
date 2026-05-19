@@ -394,11 +394,16 @@ function generateCSV(
 }
 
 function downloadCSV(content: string, filename: string) {
+  // UTF-8 BOM 추가 → 윈도우 Excel에서 한글 깨짐 방지
+  const bom = '﻿';
+  const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const element = document.createElement('a');
-  element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(content));
+  element.setAttribute('href', url);
   element.setAttribute('download', filename);
   element.style.display = 'none';
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
+  URL.revokeObjectURL(url);
 }
