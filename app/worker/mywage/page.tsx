@@ -19,7 +19,7 @@ interface DailyRecord {
 // calculateWorkingHours 내부에서 이미 점심시간(1h) 차감 처리됨
 function calcDailyWage(checkIn: string, checkOut: string) {
   // 근무시간 시간 단위 절사 (9시간 20분 → 9시간)
-  const workingHours = Math.floor(calculateWorkingHours(new Date(checkIn), new Date(checkOut)));
+  const workingHours = calculateWorkingHours(new Date(checkIn), new Date(checkOut));
   const baseHours = Math.min(workingHours, 8);
   const overtimeHours = Math.floor(Math.max(0, workingHours - 8));
   const dailyWage =

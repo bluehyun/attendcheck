@@ -90,10 +90,10 @@ function SalaryContent() {
     for (const r of records) {
       if (!r.check_in_time || !r.check_out_time) continue;
 
-      const hoursWorked = Math.floor(calculateWorkingHours(
+      const hoursWorked = calculateWorkingHours(
         new Date(r.check_in_time),
         new Date(r.check_out_time)
-      ));
+      );
       const regularHours = Math.min(hoursWorked, 8);
       const overtimeHours = Math.floor(Math.max(0, hoursWorked - 8));
       const regularWage = Math.floor(regularHours * HOURLY_RATE);

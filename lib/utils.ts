@@ -23,11 +23,22 @@ export function calculateWeeklyWage(regularHours: number, overtimeHours: number)
 }
 
 // 시간 계산 함수
+// - 업무 시작은 오전 9시 기준 (일찍 출근해도 9시부터 카운트)
+// - 퇴근 시간은 시간 단위 절사 (18:01 → 18:00)
+// - 점심시간 1시간 제외
 export function calculateWorkingHours(checkIn: Date, checkOut: Date): number {
-  const diffMs = checkOut.getTime() - checkIn.getTime();
-  const diffHours = diffMs / (1000 * 60 * 60);
+  // 유효 시작: 실제 출근과 오전 9시 중 늦은 시각
+  const nineAM = new Date(checkIn);
+  nineAM.setHours(9, 0, 0, 0);
+  const effectiveStart = checkIn < nineAM ? nineAM : checkIn;
+
+  // 유효 종료: 분/초 절사 (시간 단위로만 인정)
+  const effectiveEnd = new Date(checkOut);
+  effectiveEnd.setMinutes(0, 0, 0);
+
+  const diffHours = (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60);
   const workingHours = Math.max(0, diffHours - LUNCH_TIME_HOURS);
-  return Math.round(workingHours * 10) / 10;
+  return workingHours;
 }
 
 // 날짜 포맷팅
