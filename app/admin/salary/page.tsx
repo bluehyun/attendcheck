@@ -387,7 +387,8 @@ function generateCSV(
   for (const [phone, w] of weeklyMap) {
     const regularWage = Math.floor(w.regularHours * HOURLY_RATE);
     const overtimeWage = Math.floor(w.overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
-    lines.push([phone, phone, w.regularHours, w.overtimeHours, regularWage, overtimeWage, w.weeklyHolidayBonus, w.totalWage].join(','));
+    const name = dailyGroups.flatMap((g) => g.workers).find((r) => r.phone === phone)?.name ?? '';
+    lines.push([name, phone, w.regularHours, w.overtimeHours, regularWage, overtimeWage, w.weeklyHolidayBonus, w.totalWage].join(','));
   }
 
   return lines.join('\n');
