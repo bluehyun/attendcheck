@@ -7,10 +7,10 @@ import { AuthGuard } from '@/components/AuthGuard';
 import {
   formatDate,
   calculateWorkingHours,
+  calculateWeeklyHolidayAllowance,
   HOURLY_RATE,
   OVERTIME_MULTIPLIER,
-  WEEKLY_HOLIDAY_ALLOWANCE,
-  WEEKLY_MINIMUM_HOURS,
+  WEEKLY_MINIMUM_DAYS,
   getWeekStart,
   getWeekEnd,
 } from '@/lib/utils';
@@ -32,10 +32,12 @@ interface DailyGroup {
   dayTotal: number;
 }
 
-// 주간 주휴수당 계산용 (전화번호별 주간 합산)
+// 주간 전화번호별 합산
 interface WeeklyWorker {
+  name: string;
   regularHours: number;
   overtimeHours: number;
+  workedDays: number;
   weeklyHolidayBonus: number;
   totalWage: number;
 }
@@ -84,8 +86,8 @@ function SalaryContent() {
 
     // 날짜별 그룹핑
     const dateMap = new Map<string, DailyWorkerRow[]>();
-    // 주간 전화번호별 합산 (주휴수당 계산용)
-    const phoneWeeklyMap = new Map<string, { regularHours: number; overtimeHours: number }>();
+    // 주간 전화번호별 합산
+    const phoneWeeklyMap = new Map<string, { name: string; regularHours: number; overtimeHours: number; workedDays: number }>();
 
     for (const r of records) {
       if (!r.check_in_time || !r.check_out_time) continue;
@@ -111,23 +113,28 @@ function SalaryContent() {
         totalWage: regularWage + overtimeWage,
       });
 
-      // 주간 합산
-      if (!phoneWeeklyMap.has(r.phone)) phoneWeeklyMap.set(r.phone, { regularHours: 0, overtimeHours: 0 });
+      // 주간 합산 (근무일수 카운트 포함)
+      if (!phoneWeeklyMap.has(r.phone)) {
+        phoneWeeklyMap.set(r.phone, { name: r.name, regularHours: 0, overtimeHours: 0, workedDays: 0 });
+      }
       const pw = phoneWeeklyMap.get(r.phone)!;
       pw.regularHours += regularHours;
       pw.overtimeHours += overtimeHours;
+      pw.workedDays += 1;
     }
 
-    // 주간 주휴수당 계산
+    // 주간 주휴수당 계산: (주간합계/40)*8*시급, 주 5일 근무자만
     const newWeeklyMap = new Map<string, WeeklyWorker>();
-    for (const [phone, { regularHours, overtimeHours }] of phoneWeeklyMap) {
-      const weeklyHolidayBonus =
-        regularHours + overtimeHours >= WEEKLY_MINIMUM_HOURS ? WEEKLY_HOLIDAY_ALLOWANCE : 0;
+    for (const [phone, { name, regularHours, overtimeHours, workedDays }] of phoneWeeklyMap) {
+      const totalWeeklyHours = regularHours + overtimeHours;
+      const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours, workedDays);
       const regularWage = Math.floor(regularHours * HOURLY_RATE);
       const overtimeWage = Math.floor(overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
       newWeeklyMap.set(phone, {
+        name,
         regularHours,
         overtimeHours,
+        workedDays,
         weeklyHolidayBonus,
         totalWage: regularWage + overtimeWage + weeklyHolidayBonus,
       });
@@ -277,10 +284,10 @@ function SalaryContent() {
               </div>
             ))}
 
-            {/* 주간 주휴수당 포함 최종 합계 */}
+            {/* 주간 최종 급여 합계 */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-lg font-bold text-black mb-4 pb-2 border-b border-gray-200">
-                📋 주간 최종 급여 (주휴수당 포함)
+                📋 주간 급여 합계
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -288,25 +295,23 @@ function SalaryContent() {
                     <tr>
                       <th className="px-4 py-3 text-left font-semibold text-black">이름</th>
                       <th className="px-4 py-3 text-left font-semibold text-black">전화번호</th>
+                      <th className="px-4 py-3 text-right font-semibold text-black">근무일</th>
                       <th className="px-4 py-3 text-right font-semibold text-black">정상 시간</th>
                       <th className="px-4 py-3 text-right font-semibold text-black">연장 시간</th>
                       <th className="px-4 py-3 text-right font-semibold text-black">기본급</th>
                       <th className="px-4 py-3 text-right font-semibold text-black">연장수당</th>
-                      <th className="px-4 py-3 text-right font-semibold text-black">주휴수당</th>
                       <th className="px-4 py-3 text-right font-semibold text-black">합계</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Array.from(weeklyMap.entries()).map(([phone, w], idx) => {
-                      const name = dailyGroups
-                        .flatMap((g) => g.workers)
-                        .find((r) => r.phone === phone)?.name ?? '';
                       const regularWage = Math.floor(w.regularHours * HOURLY_RATE);
                       const overtimeWage = Math.floor(w.overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
                       return (
                         <tr key={phone} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-4 py-3 font-medium text-gray-900">{name}</td>
+                          <td className="px-4 py-3 font-medium text-gray-900">{w.name}</td>
                           <td className="px-4 py-3 text-gray-600">{phone}</td>
+                          <td className="px-4 py-3 text-right text-gray-800">{w.workedDays}일</td>
                           <td className="px-4 py-3 text-right text-gray-800">{w.regularHours}h</td>
                           <td className="px-4 py-3 text-right text-orange-600 font-semibold">
                             {w.overtimeHours > 0 ? `${w.overtimeHours}h` : '-'}
@@ -317,23 +322,79 @@ function SalaryContent() {
                           <td className="px-4 py-3 text-right text-orange-600 font-semibold">
                             {overtimeWage > 0 ? `₩${overtimeWage.toLocaleString()}` : '-'}
                           </td>
-                          <td className="px-4 py-3 text-right text-green-600 font-semibold">
-                            {w.weeklyHolidayBonus > 0
-                              ? `₩${w.weeklyHolidayBonus.toLocaleString()}`
-                              : '-'}
-                          </td>
-                          <td className="px-4 py-3 text-right font-bold text-lg text-primary">
-                            ₩{w.totalWage.toLocaleString()}
+                          <td className="px-4 py-3 text-right font-bold text-primary">
+                            ₩{(regularWage + overtimeWage).toLocaleString()}
                           </td>
                         </tr>
                       );
                     })}
                     <tr className="border-t-2 border-gray-300 bg-gray-50">
                       <td colSpan={7} className="px-4 py-3 font-bold text-gray-800">합계</td>
-                      <td className="px-4 py-3 text-right font-bold text-lg text-green-600">
-                        ₩{totalPayroll.toLocaleString()}
+                      <td className="px-4 py-3 text-right font-bold text-green-600">
+                        ₩{Array.from(weeklyMap.values()).reduce((s, w) => {
+                          const rw = Math.floor(w.regularHours * HOURLY_RATE);
+                          const ow = Math.floor(w.overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
+                          return s + rw + ow;
+                        }, 0).toLocaleString()}
                       </td>
                     </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 주휴수당 별도 정리 (주 5일 근무자 한정) */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-bold text-black mb-1 pb-2 border-b border-gray-200">
+                🗓️ 주휴수당 내역
+              </h2>
+              <p className="text-xs text-gray-500 mb-4">
+                주 {WEEKLY_MINIMUM_DAYS}일 근무자 한정 · 계산식: (주간 근무시간 합계 ÷ 40) × 8 × 시급
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-black">이름</th>
+                      <th className="px-4 py-3 text-left font-semibold text-black">전화번호</th>
+                      <th className="px-4 py-3 text-right font-semibold text-black">근무일</th>
+                      <th className="px-4 py-3 text-right font-semibold text-black">주간 근무시간</th>
+                      <th className="px-4 py-3 text-right font-semibold text-black">주휴수당</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from(weeklyMap.entries())
+                      .filter(([, w]) => w.workedDays >= WEEKLY_MINIMUM_DAYS)
+                      .map(([phone, w], idx) => (
+                        <tr key={phone} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-4 py-3 font-medium text-gray-900">{w.name}</td>
+                          <td className="px-4 py-3 text-gray-600">{phone}</td>
+                          <td className="px-4 py-3 text-right text-gray-800">{w.workedDays}일</td>
+                          <td className="px-4 py-3 text-right text-gray-800">
+                            {w.regularHours + w.overtimeHours}h
+                          </td>
+                          <td className="px-4 py-3 text-right font-bold text-green-600">
+                            ₩{w.weeklyHolidayBonus.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    {Array.from(weeklyMap.values()).every((w) => w.workedDays < WEEKLY_MINIMUM_DAYS) && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                          주 5일 근무자가 없습니다
+                        </td>
+                      </tr>
+                    )}
+                    {Array.from(weeklyMap.values()).some((w) => w.workedDays >= WEEKLY_MINIMUM_DAYS) && (
+                      <tr className="border-t-2 border-gray-300 bg-gray-50">
+                        <td colSpan={4} className="px-4 py-3 font-bold text-gray-800">주휴수당 합계</td>
+                        <td className="px-4 py-3 text-right font-bold text-green-600">
+                          ₩{Array.from(weeklyMap.values())
+                            .reduce((s, w) => s + w.weeklyHolidayBonus, 0)
+                            .toLocaleString()}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

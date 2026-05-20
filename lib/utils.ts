@@ -1,9 +1,14 @@
 // 시급 관련 상수
 export const HOURLY_RATE = 10320; // 기본 시급
 export const OVERTIME_MULTIPLIER = 1.5; // 연장근무 배수
-export const WEEKLY_HOLIDAY_ALLOWANCE = 82560; // 주휴수당
-export const WEEKLY_MINIMUM_HOURS = 15; // 주휴수당 최소 근무시간
 export const LUNCH_TIME_HOURS = 1; // 점심시간 제외 시간
+export const WEEKLY_MINIMUM_DAYS = 5; // 주휴수당 최소 근무일수
+
+// 주휴수당 계산: (주간 근무시간 합계 / 40) * 8 * 시급, 주 5일 근무자에 한함
+export function calculateWeeklyHolidayAllowance(totalWeeklyHours: number, workedDays: number): number {
+  if (workedDays < WEEKLY_MINIMUM_DAYS) return 0;
+  return Math.floor((totalWeeklyHours / 40) * 8 * HOURLY_RATE);
+}
 
 // 급여 계산 함수
 export function calculateDailyWage(hours: number): number {

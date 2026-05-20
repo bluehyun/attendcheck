@@ -8,8 +8,8 @@ import {
   calculateWorkingHours,
   HOURLY_RATE,
   OVERTIME_MULTIPLIER,
-  WEEKLY_HOLIDAY_ALLOWANCE,
-  WEEKLY_MINIMUM_HOURS,
+  calculateWeeklyHolidayAllowance,
+  WEEKLY_MINIMUM_DAYS,
   getWeekStart,
   getWeekEnd,
 } from '@/lib/utils';
@@ -102,7 +102,6 @@ export default function WorkerWagePage() {
           new Date(record.check_out_time!)
         );
 
-        // 8시간 초과분은 연장근무로 계산
         const regularHours = Math.min(hoursWorked, 8);
         const overtimeHours = Math.floor(Math.max(0, hoursWorked - 8));
 
@@ -123,17 +122,16 @@ export default function WorkerWagePage() {
 
     setDailyWages(daily);
 
-    // 주간 급여 계산
+    // 주간 급여 계산 (주휴수당: 주 5일 근무자 한정, (합계/40)*8*시급)
+    const workedDays = daily.length;
+    const totalWeeklyHours = totalRegularHours + totalOvertimeHours;
     const regularWage = Math.round(HOURLY_RATE * totalRegularHours);
     const overtimeWage = Math.round(HOURLY_RATE * OVERTIME_MULTIPLIER * totalOvertimeHours);
-    const weeklyHolidayBonus =
-      totalRegularHours + totalOvertimeHours >= WEEKLY_MINIMUM_HOURS
-        ? WEEKLY_HOLIDAY_ALLOWANCE
-        : 0;
+    const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours, workedDays);
 
     setWeeklySummary({
-      regularHours: Math.round(totalRegularHours * 10) / 10,
-      overtimeHours: Math.round(totalOvertimeHours * 10) / 10,
+      regularHours: totalRegularHours,
+      overtimeHours: totalOvertimeHours,
       regularWage,
       overtimeWage,
       weeklyHolidayBonus,
@@ -264,14 +262,16 @@ export default function WorkerWagePage() {
                             ₩{weeklySummary.overtimeWage.toLocaleString()}
                           </span>
                         </div>
-                        {weeklySummary.weeklyHolidayBonus > 0 && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">주휴수당:</span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">주휴수당:</span>
+                          {weeklySummary.weeklyHolidayBonus > 0 ? (
                             <span className="font-semibold text-green-600">
                               ₩{weeklySummary.weeklyHolidayBonus.toLocaleString()}
                             </span>
-                          </div>
-                        )}
+                          ) : (
+                            <span className="text-xs text-gray-400">주 5일 근무 시 지급</span>
+                          )}
+                        </div>
                         <div className="pt-2 border-t border-green-200 flex justify-between">
                           <span className="text-gray-600 font-semibold">합계:</span>
                           <span className="font-bold text-lg text-green-700">
