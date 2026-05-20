@@ -9,7 +9,6 @@ import {
   HOURLY_RATE,
   OVERTIME_MULTIPLIER,
   calculateWeeklyHolidayAllowance,
-  WEEKLY_MINIMUM_DAYS,
   getWeekStart,
   getWeekEnd,
 } from '@/lib/utils';
