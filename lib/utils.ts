@@ -19,14 +19,6 @@ export function calculateOvertimeWage(hours: number): number {
   return Math.round(HOURLY_RATE * OVERTIME_MULTIPLIER * hours);
 }
 
-export function calculateWeeklyWage(regularHours: number, overtimeHours: number): number {
-  const regularWage = calculateDailyWage(regularHours);
-  const overtimeWage = calculateOvertimeWage(overtimeHours);
-  const weeklyHolidayBonus = regularHours >= WEEKLY_MINIMUM_HOURS ? WEEKLY_HOLIDAY_ALLOWANCE : 0;
-  
-  return regularWage + overtimeWage + weeklyHolidayBonus;
-}
-
 // 시간 계산 함수
 // - 업무 시작은 오전 9시 기준 (일찍 출근해도 9시부터 카운트)
 // - 퇴근 시간은 시간 단위 절사 (18:01 → 18:00)
