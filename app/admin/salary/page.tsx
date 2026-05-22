@@ -10,7 +10,7 @@ import {
   calculateWeeklyHolidayAllowance,
   HOURLY_RATE,
   OVERTIME_MULTIPLIER,
-  WEEKLY_MINIMUM_DAYS,
+  WEEKLY_MINIMUM_HOURS,
   getWeekStart,
   getWeekEnd,
 } from '@/lib/utils';
@@ -123,11 +123,11 @@ function SalaryContent() {
       pw.workedDays += 1;
     }
 
-    // 주간 주휴수당 계산: (주간합계/40)*8*시급, 주 5일 근무자만
+    // 주간 주휴수당 계산: (주간합계/40)*8*시급, 주 15시간 이상 근무자
     const newWeeklyMap = new Map<string, WeeklyWorker>();
     for (const [phone, { name, regularHours, overtimeHours, workedDays }] of phoneWeeklyMap) {
       const totalWeeklyHours = regularHours + overtimeHours;
-      const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours, workedDays);
+      const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours);
       const regularWage = Math.floor(regularHours * HOURLY_RATE);
       const overtimeWage = Math.floor(overtimeHours * HOURLY_RATE * OVERTIME_MULTIPLIER);
       newWeeklyMap.set(phone, {
@@ -343,13 +343,13 @@ function SalaryContent() {
               </div>
             </div>
 
-            {/* 주휴수당 별도 정리 (주 5일 근무자 한정) */}
+            {/* 주휴수당 별도 정리 (주 15시간 이상 근무자) */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-lg font-bold text-black mb-1 pb-2 border-b border-gray-200">
                 🗓️ 주휴수당 내역
               </h2>
               <p className="text-xs text-gray-500 mb-4">
-                주 {WEEKLY_MINIMUM_DAYS}일 근무자 한정 · 계산식: (주간 근무시간 합계 ÷ 40) × 8 × 시급
+                주 {WEEKLY_MINIMUM_HOURS}시간 이상 근무자 지급 · 계산식: (주간 근무시간 합계 ÷ 40) × 8 × 시급
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -364,7 +364,7 @@ function SalaryContent() {
                   </thead>
                   <tbody>
                     {Array.from(weeklyMap.entries())
-                      .filter(([, w]) => w.workedDays >= WEEKLY_MINIMUM_DAYS)
+                      .filter(([, w]) => w.weeklyHolidayBonus > 0)
                       .map(([phone, w], idx) => (
                         <tr key={phone} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <td className="px-4 py-3 font-medium text-gray-900">{w.name}</td>
@@ -378,14 +378,14 @@ function SalaryContent() {
                           </td>
                         </tr>
                       ))}
-                    {Array.from(weeklyMap.values()).every((w) => w.workedDays < WEEKLY_MINIMUM_DAYS) && (
+                    {Array.from(weeklyMap.values()).every((w) => w.weeklyHolidayBonus === 0) && (
                       <tr>
                         <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                          주 5일 근무자가 없습니다
+                          주 {WEEKLY_MINIMUM_HOURS}시간 이상 근무자가 없습니다
                         </td>
                       </tr>
                     )}
-                    {Array.from(weeklyMap.values()).some((w) => w.workedDays >= WEEKLY_MINIMUM_DAYS) && (
+                    {Array.from(weeklyMap.values()).some((w) => w.weeklyHolidayBonus > 0) && (
                       <tr className="border-t-2 border-gray-300 bg-gray-50">
                         <td colSpan={4} className="px-4 py-3 font-bold text-gray-800">주휴수당 합계</td>
                         <td className="px-4 py-3 text-right font-bold text-green-600">

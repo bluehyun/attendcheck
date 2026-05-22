@@ -121,12 +121,11 @@ export default function WorkerWagePage() {
 
     setDailyWages(daily);
 
-    // 주간 급여 계산 (주휴수당: 주 5일 근무자 한정, (합계/40)*8*시급)
-    const workedDays = daily.length;
+    // 주간 급여 계산 (주휴수당: 주 15시간 이상, (합계/40)*8*시급)
     const totalWeeklyHours = totalRegularHours + totalOvertimeHours;
     const regularWage = Math.round(HOURLY_RATE * totalRegularHours);
     const overtimeWage = Math.round(HOURLY_RATE * OVERTIME_MULTIPLIER * totalOvertimeHours);
-    const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours, workedDays);
+    const weeklyHolidayBonus = calculateWeeklyHolidayAllowance(totalWeeklyHours);
 
     setWeeklySummary({
       regularHours: totalRegularHours,
@@ -268,7 +267,7 @@ export default function WorkerWagePage() {
                               ₩{weeklySummary.weeklyHolidayBonus.toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400">주 5일 근무 시 지급</span>
+                            <span className="text-xs text-gray-400">주 15시간 이상 근무 시 지급</span>
                           )}
                         </div>
                         <div className="pt-2 border-t border-green-200 flex justify-between">
